@@ -12,6 +12,7 @@ use crate::{
 use file_drop::FileDropController;
 
 use std::{collections::HashSet, mem::MaybeUninit, rc::Rc, sync::mpsc};
+use std::sync::Arc;
 
 use once_cell::unsync::OnceCell;
 
@@ -57,7 +58,7 @@ pub struct InnerWebView {
 
 impl InnerWebView {
   pub fn new(
-    window: Rc<Window>,
+    window: Arc<Window>,
     mut attributes: WebViewAttributes,
     web_context: Option<&mut WebContext>,
   ) -> Result<Self> {
@@ -175,7 +176,7 @@ impl InnerWebView {
   }
 
   fn init_webview(
-    window: Rc<Window>,
+    window: Arc<Window>,
     hwnd: HWND,
     mut attributes: WebViewAttributes,
     env: &ICoreWebView2Environment,
@@ -251,7 +252,7 @@ impl InnerWebView {
         .SetBounds(rect)
         .map_err(webview2_com::Error::WindowsError)?;
 
-      // Make background transparent
+      // Make background transparent by default
       let controller2 = controller.cast::<ICoreWebView2Controller2>()?;
       controller2
           .SetDefaultBackgroundColor(COREWEBVIEW2_COLOR {

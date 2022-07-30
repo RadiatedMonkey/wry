@@ -48,7 +48,8 @@ use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Controller;
 #[cfg(target_os = "windows")]
 use windows::{Win32::Foundation::HWND, Win32::UI::WindowsAndMessaging::DestroyWindow};
 
-use std::{path::PathBuf, rc::Rc};
+use std::path::PathBuf;
+use std::sync::Arc;
 use tao::event::Rectangle;
 
 pub use url::Url;
@@ -197,12 +198,12 @@ impl Default for WebViewAttributes {
 pub struct WebViewBuilder<'a> {
   pub webview: WebViewAttributes,
   web_context: Option<&'a mut WebContext>,
-  window: Window,
+  window: Arc<Window>,
 }
 
 impl<'a> WebViewBuilder<'a> {
   /// Create [`WebViewBuilder`] from provided [`Window`].
-  pub fn new(window: Window) -> Result<Self> {
+  pub fn new(window: Arc<Window>) -> Result<Self> {
     let webview = WebViewAttributes::default();
     let web_context = None;
 
@@ -399,9 +400,8 @@ impl<'a> WebViewBuilder<'a> {
   ///
   /// [`EventLoop`]: crate::application::event_loop::EventLoop
   pub fn build(self) -> Result<WebView> {
-    let window = Rc::new(self.window);
-    let webview = InnerWebView::new(window.clone(), self.webview, self.web_context)?;
-    Ok(WebView { window, webview })
+    let webview = InnerWebView::new(self.window.clone(), self.webview, self.web_context)?;
+    Ok(WebView { window: self.window, webview })
   }
 }
 
@@ -412,7 +412,7 @@ impl<'a> WebViewBuilder<'a> {
 /// [`WebView`] presents the actual WebView window and let you still able to perform actions
 /// during event handling to it. [`WebView`] also contains the associate [`Window`] with it.
 pub struct WebView {
-  window: Rc<Window>,
+  window: Arc<Window>,
   webview: InnerWebView,
 }
 
@@ -455,7 +455,7 @@ impl WebView {
   /// called in the same thread with the [`EventLoop`] you create.
   ///
   /// [`EventLoop`]: crate::application::event_loop::EventLoop
-  pub fn new(window: Window) -> Result<Self> {
+  pub fn new(window: Arc<Window>) -> Result<Self> {
     WebViewBuilder::new(window)?.build()
   }
 
