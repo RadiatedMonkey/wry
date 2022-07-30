@@ -49,8 +49,10 @@ use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Controller;
 use windows::{Win32::Foundation::HWND, Win32::UI::WindowsAndMessaging::DestroyWindow};
 
 use std::{path::PathBuf, rc::Rc};
+use tao::event::Rectangle;
 
 pub use url::Url;
+use windows::Win32::Foundation::RECT;
 
 #[cfg(target_os = "windows")]
 use crate::application::platform::windows::WindowExtWindows;
@@ -525,6 +527,16 @@ impl WebView {
     }
     #[cfg(not(target_os = "macos"))]
     self.window.inner_size()
+  }
+
+  pub fn set_bounds(&self, bounds: &Rectangle) {
+    let rect = RECT {
+      left: bounds.position.x as i32,
+      right: bounds.size.width as i32,
+      top: bounds.position.y as i32,
+      bottom: bounds.size.height as i32
+    };
+    unsafe { self.webview.controller.SetBounds(rect).unwrap() };
   }
 
   /// Set the webview zoom level

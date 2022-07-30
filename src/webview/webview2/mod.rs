@@ -681,8 +681,9 @@ window.addEventListener('mousemove', (e) => window.chrome.webview.postMessage('_
   }
 
   #[cfg(any(debug_assertions, feature = "devtools"))]
-  pub fn open_devtools(&self) {
-    let _ = unsafe { self.webview.OpenDevToolsWindow() };
+  pub fn open_devtools(&self)
+  {
+      let _ = unsafe { self.webview.OpenDevToolsWindow() };
   }
 
   #[cfg(any(debug_assertions, feature = "devtools"))]
