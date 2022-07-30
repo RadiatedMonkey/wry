@@ -250,6 +250,14 @@ impl InnerWebView {
       controller
         .SetBounds(rect)
         .map_err(webview2_com::Error::WindowsError)?;
+
+      // Make background transparent
+      let controller2 = controller.cast::<ICoreWebView2Controller2>()?;
+      controller2
+          .SetDefaultBackgroundColor(COREWEBVIEW2_COLOR {
+            A: 0, R: 0, G: 0, B: 0
+          })
+          .map_err(webview2_com::Error::WindowsError)?;
     }
 
     // Initialize scripts
